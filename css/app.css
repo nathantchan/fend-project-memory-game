@@ -51,6 +51,13 @@ h1 {
     margin: 0 0 3em;
 }
 
+@media screen and (max-width: 650px) {
+    .deck {
+      width: 100%;
+    }
+}
+
+
 .deck .card {
     height: 125px;
     width: 125px;
@@ -64,6 +71,18 @@ h1 {
     align-items: center;
     box-shadow: 5px 2px 20px 0 rgba(46, 61, 73, 0.5);
 }
+
+@media screen and (max-width: 600px) {
+    .deck .card {
+      width: 30%; 
+      height: 15%;
+      max-width: 125px;
+      max-height: 125px;
+      /*padding: 10px;*/
+    }
+}
+
+
 
 .deck .card.open {
     transform: rotateY(0);
@@ -81,6 +100,11 @@ h1 {
     font-size: 33px;
 }
 
+.deck .card.mismatch {
+    font-size: 33px;
+    background: #a080c9;
+}
+
 /*
  * Styles for the Score Panel
  */
@@ -94,16 +118,22 @@ h1 {
 .score-panel .stars {
     margin: 0;
     padding: 0;
-    display: inline-block;
     margin: 0 5px 0 0;
-}
-
-.score-panel .stars li {
-    list-style: none;
-    display: inline-block;
 }
 
 .score-panel .restart {
     float: right;
+}
+
+.stars {
+  display: inline-block;
+}
+
+.stars li {
+    list-style: none;
+    display: inline-block;
+}
+
+.restart {
     cursor: pointer;
 }

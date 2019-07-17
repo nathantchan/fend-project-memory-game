@@ -1,29 +1,24 @@
+const body = document.querySelector("body");
+
 const cards = document.querySelectorAll(".card");
 const cardsArr = Array.from(cards);
 
-/*
- * Create winning page without displaying
- */
+const header = document.querySelector("header");
+  
+const scorePanel = document.querySelector(".score-panel");
+const stars = document.querySelector(".stars");
 
-const winHeading = document.createElement("span");
-winHeading.innerHTML= "<h1>Congratulations! You have won the game!</h1></span>";
-const score = document.createElement("p");
-const numMoves = document.createElement("span");
-const numSeconds = document.createElement("p");
-const resetQ = document.createElement("p");
-resetQ.textContent = "Reset ?";
+const deck = document.querySelector(".deck");
 
-const win = document.createElement('body');
-win.appendChild(winHeading);
-win.appendChild(score);
-win.appendChild(numMoves);
-win.appendChild(numSeconds);
+const gamePage = document.querySelector(".game");
+const winningPage = document.querySelector(".win");
+
+let timer;
 
 openedCards = [];
 
 function reshuffleDeck() {
   /* reshuffle the deck of cards */
-  const deck = document.querySelector(".deck");
   while (deck.firstChild) {
     deck.removeChild(deck.firstChild);
   }
@@ -34,7 +29,14 @@ function reshuffleDeck() {
   }
 }
 
-reshuffleDeck();
+function resetScorePanel() {
+  document.querySelector(".seconds").textContent = 0;
+  document.querySelector(".moves").textContent = 0;
+  for (s of stars.children) {
+    /* add back all the stars */
+    s.children[0].classList.add("fa-star");
+  }
+}
 
 
 function cardsMatch(openedCards) {
@@ -48,55 +50,55 @@ function flipCard(evt) {
   if (evt.target.nodeName == 'LI') {
     evt.target.classList.add("open");
     evt.target.classList.add("show");
-    openedCards.push(evt.target);
+    if (!openedCards.includes(evt.target)) {
+      openedCards.push(evt.target);
 
-    incMoves();
+      incMoves();
+    }
 
     if (openedCards.length > 1) {
+      // temporarily stop responding to additional clicks 
+      deck.removeEventListener('click', flipCard);
+
       if (cardsMatch(openedCards)) {
         openedCards.forEach(markAsMatched);
         if (allCardsMatch()) {
           winTheGame();
         }
         openedCards = [];
+        deck.addEventListener('click', flipCard);
       } else {
         openedCards.forEach(markAsMisMatched);
         // Give player chance to see mismatched cards before flipping them back
         setTimeout(function() {
           openedCards.forEach(resetCard);
           openedCards = [];
+          deck.addEventListener('click', flipCard);
         }, 750);
       }
+      
     }
   }
 }
 
 function winTheGame() {
-  // Generate the win the game page
-  let stars = document.querySelector(".stars");
-  let moves = document.querySelector(".moves").textContent;
-  let seconds = document.querySelector(".seconds").textContent;
-  let restart = document.querySelector(".restart");
-
-  const body = document.querySelector('body');
-
   clearInterval(timer);
 
-  body.remove();
+  gamePage.remove();
 
-  score.textContent = `Your score is`;
-  score.insertAdjacentHTML('beforeend', stars.outerHTML);
-  numMoves.textContent = `Your number of moves is ${moves}`;
-  numSeconds.textContent = `You completed in ${seconds} seconds`;
-
-  resetQ.appendChild(restart);
-  win.appendChild(resetQ);
-  document.querySelector("html").appendChild(win);
+  body.appendChild(winningPage);
+  winningPage.appendChild(scorePanel);
 }
 
 function reloadTheGame() {
   // Refresh the page to reload the game
-  location.reload();
+  winningPage.remove();
+  body.appendChild(gamePage);
+  header.insertAdjacentElement("afterend", scorePanel);
+  reshuffleDeck();
+  resetScorePanel();
+  clearInterval(timer);
+  deck.addEventListener('click', startTimer);
 }
    
 function incMoves() {
@@ -114,16 +116,18 @@ function incSeconds() {
   document.querySelector(".seconds").textContent = seconds;
 }
 
-let timer = setInterval(incSeconds, 1000);
+function startTimer() {
+  timer = setInterval(incSeconds, 1000);
+  deck.removeEventListener('click', startTimer);
+}
 
 function checkAndUpdateScore(moves) {
   // Deduct to two stars if > 20 moves. Deduct again if > 40.
-  stars = document.querySelector(".stars");
-  if (moves > 20 && stars.childElementCount > 2) {
-    stars.firstElementChild.remove();
+  if (moves > 20) {
+    stars.children[0].children[0].classList.remove("fa-star");
   }
-  if (moves > 40 && stars.childElementCount > 1) {
-    stars.firstElementChild.remove();
+  if (moves > 40) {
+    stars.children[1].children[0].classList.remove("fa-star");
   }
 }
 
@@ -171,5 +175,7 @@ function shuffle(array) {
 }
 
 // Setup page event listeners
-document.querySelector(".deck").addEventListener('click', flipCard);
+deck.addEventListener('click', flipCard);
 document.querySelector(".restart").addEventListener('click', reloadTheGame);
+
+reloadTheGame();
